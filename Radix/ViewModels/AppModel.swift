@@ -149,6 +149,11 @@ final class AppModel: ObservableObject {
             synchronizeDiscardPileReviewPresentation()
         }
     }
+    @Published private(set) var showsCleanup = false {
+        didSet {
+            synchronizeCleanupPresentation()
+        }
+    }
     @Published private(set) var fullDiskAccessStatus: FullDiskAccessStatus
     @Published private(set) var isExportPanelPresented = false
     @Published var lastErrorMessage: String? {
@@ -161,6 +166,7 @@ final class AppModel: ObservableObject {
     }
     @Published private(set) var exportConfirmation: ExportConfirmationState?
     let trashFlow = TrashFlowController()
+    let cleanupFlow = CleanupFlowController()
     let comparisonFlow = ComparisonFlowController()
     let workspaceTour = WorkspaceTourController()
     private let tourSession = WorkspaceTourSessionController(directoryRootURL: TourPracticeDirectory.defaultRootURL)
@@ -748,6 +754,16 @@ final class AppModel: ObservableObject {
         showsDiscardPileReview = true
     }
 
+    func presentCleanup() {
+        showsCleanup = true
+    }
+
+    func dismissCleanup() {
+        cleanupFlow.cancelScan()
+        cleanupFlow.cancelCleaning()
+        showsCleanup = false
+    }
+
     func dismissDiscardPileReview() {
         cancelDiscardPilePreparation()
         if pendingDiscardPileCleanup != nil {
@@ -766,6 +782,8 @@ final class AppModel: ObservableObject {
             dismissOnboarding()
         case .discardPileReview:
             dismissDiscardPileReview()
+        case .cleanup:
+            dismissCleanup()
         case .importPreview:
             cancelImportPreview()
         case .comparisonSetup:
@@ -792,6 +810,14 @@ final class AppModel: ObservableObject {
             presentationCoordinator.present(.sheet(.discardPileReview))
         } else {
             dismissPresentation(.discardPileReview)
+        }
+    }
+
+    private func synchronizeCleanupPresentation() {
+        if showsCleanup {
+            presentationCoordinator.present(.sheet(.cleanup))
+        } else {
+            dismissPresentation(.cleanup)
         }
     }
 

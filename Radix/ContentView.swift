@@ -213,6 +213,11 @@ struct ContentView: View {
                     )
                 )
                 .environmentObject(appModel.workspaceTour)
+            case .cleanup:
+                CleanupView(
+                    flow: appModel.cleanupFlow,
+                    dismiss: { appModel.dismissCleanup() }
+                )
             case .importPreview:
                 if let preview = appModel.pendingImportPreview {
                     ImportSnapshotPreviewSheet(
@@ -605,6 +610,7 @@ private extension ContentView {
             revealInFinder: { appModel.revealTargetInFinder($0) },
             removeRecentTarget: { appModel.removeRecentTarget($0) },
             reviewDiscardPile: { appModel.presentDiscardPileReview() },
+            openCleanup: { appModel.presentCleanup() },
             addDroppedNodesToDiscardPile: { nodeIDs, snapshotID in
                 defer { discardPileDragDidEnd() }
                 return appModel.addNodeIDsToDiscardPile(nodeIDs, snapshotID: snapshotID)

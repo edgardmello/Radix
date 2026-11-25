@@ -5,6 +5,7 @@ struct SidebarActions {
     let revealInFinder: (ScanTarget) -> Void
     let removeRecentTarget: (ScanTarget) -> Void
     let reviewDiscardPile: () -> Void
+    let openCleanup: () -> Void
     let addDroppedNodesToDiscardPile: ([FileNodeRecord.ID], UUID) -> Bool
 }
 
@@ -60,6 +61,12 @@ struct SidebarView: View {
                 }
             }
             .listStyle(.sidebar)
+
+            Divider()
+
+            CleanupSidebarButton(isDisabled: isReadOnlyMode) {
+                actions.openCleanup()
+            }
 
             if scanState.snapshot != nil || !discardPileSummary.isEmpty {
                 Divider()
@@ -264,6 +271,46 @@ private struct DiscardPileSidebarButton: View {
         }
 
         return summary.markedItemsText
+    }
+}
+
+private struct CleanupSidebarButton: View {
+    let isDisabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.accentColor.opacity(0.11))
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
+                }
+                .frame(width: 30, height: 30)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Cleanup")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Free up disk space")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .accessibilityLabel("Cleanup")
+        .help("Open Cleanup")
     }
 }
 
